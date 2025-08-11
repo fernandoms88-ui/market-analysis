@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Análise Competitiva - Pão de Açúcar</title>
+    <script src="https://kit.fontawesome.com/4a2b9542d3.js" crossorigin="anonymous"></script>
+
+    <style>
+        /* GERAL E TEMA */
+        :root {
+            --pao-de-acucar: #2ecc71;
+            --carrefour: #e74c3c;
+            --muffato: #3498db;
+            --sonda: #9b59b6;
+            --mambo: #f1c40f;
+            --natural-da-terra: #e67e22;
+            --marche: #1abc9c;
+            --oba: #fd79a8;
+
+            --bg-color: #f4f7f9;
+            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --text-color: #34495e;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --border-color: #e0e6ed;
+            --pastel-green: #eafaf1;
+            --pastel-red: #fdecea;
+            --pastel-blue: #ebf5fb;
+            --pastel-orange: #fef5eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* LAYOUT PRINCIPAL */
+        .dashboard-container {
+            max-width: 980px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            color: var(--text-color);
+            font-size: 2.2em;
+        }
+
+        header .subtitle {
+            font-size: 1.1em;
+            color: #7f8c8d;
+        }
+
+        /* NAVEGAÇÃO POR ABAS */
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            margin-bottom: 25px;
+        }
+
+        .tab-button {
+            padding: 15px 20px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            font-size: 1em;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: color 0.3s ease, border-bottom 0.3s ease;
+            flex-grow: 1;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            color: #2c3e50;
+        }
+
+        .tab-button.active {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* COMPONENTES VISUAIS */
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+        
+        .card {
+            background: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .card-header .icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+        
+        .card-header h3 {
+            font-size: 1.2em;
+            color: var(--text-color);
+        }
+
+        /* Cores dos ícones e títulos */
+        .color-pao-de-acucar { color: var(--pao-de-acucar); }
+        .color-carrefour { color: var(--carrefour); }
+        .color-muffato { color: var(--muffato); }
+        .color-sonda { color: var(--sonda); }
+        .color-mambo { color: var(--mambo); }
+        .color-natural { color: var(--natural-da-terra); }
+        .color-marche { color: var(--marche); }
+        .color-oba { color: var(--oba); }
+
+        .metric-card {
+            text-align: center;
+        }
+
+        .metric-card .value {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .metric-card .label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        /* Cores de performance */
+        .perf-excelente { color: #27ae60; }
+        .perf-bom { color: #2980b9; }
+        .perf-medio { color: #f39c12; }
+        .perf-ruim { color: #c0392b; }
+
+        /* Barras de Progresso */
+        .progress-bar-container { margin-bottom: 15px; }
+        .progress-bar-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background-color: var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 6px;
+            transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Tabelas */
+        .responsive-table-container { overflow-x: auto; }
+        .responsive-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .responsive-table th, .responsive-table td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .responsive-table thead {
+            background-color: #ecf0f1;
+        }
+        .responsive-table th {
+            font-weight: 600;
+        }
+        .responsive-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s ease;
+        }
+        .responsive-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        .responsive-table tbody tr:hover {
+            background-color: #f5f7fa;
+        }
+        .competitor-logo {
+            width: 80px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #fff;
+        }
+        .badge-alta { background-color: var(--carrefour); }
+        .badge-media { background-color: var(--mambo); }
+        .badge-baixa { background-color: var(--muffato); }
+
+        /* Anúncios */
+        .ads-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+        .ad-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .ad-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .ad-item .ad-info {
+            padding: 10px;
+            font-size: 0.9em;
+            background: #fff;
+        }
+        .ad-item .ad-info strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Análise SWOT e 5W2H */
+        .swot-matrix, .w2h-matrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .matrix-quadrant {
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .matrix-quadrant h4 {
+            display: flex;
+            align-items: center;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        .matrix-quadrant h4 i {
+            margin-right: 10px;
+        }
+        .matrix-quadrant ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .matrix-quadrant li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .matrix-quadrant li::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+        }
+
+        .swot-forcas { background-color: var(--pastel-green); border-left: 5px solid #27ae60; }
+        .swot-forcas h4 { color: #27ae60; }
+        .swot-forcas li::before { content: '\f058'; color: #27ae60; }
+
+        .swot-fraquezas { background-color: var(--pastel-red); border-left: 5px solid #c0392b; }
+        .swot-fraquezas h4 { color: #c0392b; }
+        .swot-fraquezas li::before { content: '\f057'; color: #c0392b; }
+        
+        .swot-oportunidades { background-color: var(--pastel-blue); border-left: 5px solid #2980b9; }
+        .swot-oportunidades h4 { color: #2980b9; }
+        .swot-oportunidades li::before { content: '\f0eb'; color: #2980b9; }
+        
+        .swot-ameacas { background-color: var(--pastel-orange); border-left: 5px solid #d35400; }
+        .swot-ameacas h4 { color: #d35400; }
+        .swot-ameacas li::before { content: '\f071'; color: #d35400; }
+        
+        /* Insights */
+        .insight-box {
+            background-color: #e8f4fd;
+            border-left: 5px solid #3498db;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .insight-box h4 {
+            color: #2980b9;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .insight-box h4 i { margin-right: 10px; }
+
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8em; }
+            .tabs-nav { flex-direction: column; }
+            .tab-button { border-bottom: 1px solid var(--border-color); border-left: 3px solid transparent; }
+            .tab-button.active { border-left-color: #3498db; border-bottom-color: transparent; }
+
+            .grid-cols-2, .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr; }
+            .swot-matrix, .w2h-matrix { grid-template-columns: 1fr; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <header>
+            <h1><i class="fas fa-chart-line"></i> Análise Competitiva de Mercado</h1>
+            <p class="subtitle">Foco: Vendas Online e Preço | Empresa Principal: <strong>Pão de Açúcar</strong></p>
+        </header>
+
+        <nav class="tabs-nav">
+            <button class="tab-button active" data-tab="tab-ads"><i class="fas fa-bullhorn"></i> Análise de Anúncios</button>
+            <button class="tab-button" data-tab="tab-reclamacoes"><i class="fas fa-comment-dots"></i> Análise ReclameAQUI</button>
+            <button class="tab-button" data-tab="tab-swot"><i class="fas fa-th-large"></i> Análise SWOT</button>
+            <button class="tab-button" data-tab="tab-5w2h"><i class="fas fa-tasks"></i> Plano de Ação 5W2H</button>
+        </nav>
+
+        <div id="tab-ads" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <i class="icon fas fa-bullseye color-pao-de-acucar"></i>
+                    <h3>Objetivo Estratégico do Pão de Açúcar</h3>
+                </div>
+                <p>Liderar o varejo alimentar premium no Brasil com uma experiência de compra excepcional, tanto física quanto digital, operando de forma rentável e sustentável. A análise de anúncios dos concorrentes é crucial para entender seus posicionamentos e táticas para atrair o consumidor.</p>
+            </div>
+
+            <div class="insight-box">
+                <h4><i class="fas fa-lightbulb"></i> Insights de Estratégias Competitivas</h4>
+                <ul>
+                    <li><i class="fas fa-check-circle" style="color: green;"></i> <strong>Carrefour:</strong> Foco massivo em preço e promoções agressivas. Utiliza formatos de vídeo curtos e carrosséis para exibir variedade.</li>
+                    <li><i class="fas fa-check-circle" style="color: green;"></i> <strong>OBA / Natural da Terra:</strong> Campanha focada em "frescor" e "saúde". Imagens de alta qualidade de produtos frescos são o principal ativo.</li>
+                    <li><i class="fas fa-check-circle" style="color: green;"></i> <strong>Super Muffato:</strong> Comunicação regional forte, com ênfase em clube de descontos e serviço de entrega local.</li>
+                    <li><i class="fas fa-exclamation-triangle" style="color: orange;"></i> <strong>Oportunidade para Pão de Açúcar:</strong> Reforçar a comunicação de "valor" sobre "preço". Focar em anúncios que demonstrem a curadoria de produtos, a qualidade das marcas exclusivas (Taeq, Qualitá) e a experiência de compra superior.</li>
+                </ul>
+            </div>
+            
+            <div class="grid grid-cols-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fab fa-google"></i> Exemplos de Anúncios - Google Ads (Últimos 10 dias)</h3>
+                    </div>
+                    <div class="ads-gallery">
+                        <div class="ad-item"><img src="https://via.placeholder.com/300x200/e74c3c/ffffff?text=Carrefour+-+Ofertas" alt="Anúncio Carrefour"><div class="ad-info"><strong>Carrefour</strong><span>TV 50" com 30% OFF!</span></div></div>
+                        <div class="ad-item"><img src="https://via.placeholder.com/300x200/2ecc71/ffffff?text=Pão+de+Açúcar+-+Vinhos" alt="Anúncio Pão de Açúcar"><div class="ad-info"><strong>Pão de Açúcar</strong><span>Seleção de Vinhos Europeus.</span></div></div>
+                        <div class="ad-item"><img src="https://via.placeholder.com/300x200/e67e22/ffffff?text=Natural+da+Terra" alt="Anúncio Natural da Terra"><div class="ad-info"><strong>Natural da Terra</strong><span>Sua feira orgânica em casa.</span></div></div>
+                        <div class="ad-item"><img src="https://via.placeholder.com/300x200/3498db/ffffff?text=Super+Muffato+-+APP" alt="Anúncio Muffato"><div class="ad-info"><strong>Super Muffato</strong><span>Baixe o App ClubeMuffato!</span></div></div>
+                    </div>
+                </div>
+                <div class="card">
+                     <div class="card-header">
+                        <h3><i class="fab fa-facebook"></i> Exemplos de Anúncios - Meta/Facebook (Últimos 10 dias)</h3>
+                    </div>
+                    <div class="ads-gallery">
+                        <div class="ad-item"><img src="https://via.placeholder.com/300x200/fd79a8/ffffff?text=OBA+-+Hortifruti" alt="Anúncio OBA"><div class="ad-info"><strong>OBA Hortifruti</strong><span>Frutas frescas todo dia!</span></div></div>
+                        <div class="ad-item"><img src="https://via.placeholder.com/300x200/9b59b6/ffffff?text=Sonda+Delivery" alt="Anúncio Sonda"><div class="ad-info"><strong>Sonda Delivery</strong><span>Receba suas compras em 2h.</span></div></div>
+                        <div class="ad-item"><img src="https://via.placeholder.com/300x200/f1c40f/ffffff?text=Mambo+-+Praticidade" alt="Anúncio Mambo"><div class="ad-info"><strong>Mambo</strong><span>Tudo para sua casa. Peça já!</span></div></div>
+                        <div class="ad-item"><img src="https://via.placeholder.com/300x200/1abc9c/ffffff?text=St.+Marche" alt="Anúncio Marche"><div class="ad-info"><strong>St. Marche</strong><span>Sua padaria artesanal online.</span></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-pie"></i> Análise de Formatos e Investimento Estimado</h3>
+                </div>
+                <div class="grid grid-cols-2">
+                    <div>
+                        <h4>Distribuição de Formatos de Anúncio</h4>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-label"><span>Carrefour</span><span>85%</span></div>
+                            <div class="progress-bar"><div class="progress-bar-fill" style="background-color: var(--carrefour);" data-width="85"></div></div>
+                            <small>Foco forte em Carrossel de Ofertas.</small>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-label"><span>Pão de Açúcar</span><span>70%</span></div>
+                            <div class="progress-bar"><div class="progress-bar-fill" style="background-color: var(--pao-de-acucar);" data-width="70"></div></div>
+                             <small>Mix de Imagem Única (produtos premium) e Vídeo.</small>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-label"><span>OBA / Natural da Terra</span><span>95%</span></div>
+                            <div class="progress-bar"><div class="progress-bar-fill" style="background-color: var(--oba);" data-width="95"></div></div>
+                             <small>Foco massivo em Imagem de alta qualidade.</small>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Índice de Investimento Publicitário (Estimado)</h4>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-label"><span>Carrefour</span><span>98</span></div>
+                            <div class="progress-bar"><div class="progress-bar-fill" style="background-color: var(--carrefour);" data-width="98"></div></div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-label"><span>Pão de Açúcar</span><span>85</span></div>
+                            <div class="progress-bar"><div class="progress-bar-fill" style="background-color: var(--pao-de-acucar);" data-width="85"></div></div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-label"><span>Super Muffato</span><span>75</span></div>
+                            <div class="progress-bar"><div class="progress-bar-fill" style="background-color: var(--muffato);" data-width="75"></div></div>
+                        </div>
+                         <div class="progress-bar-container">
+                            <div class="progress-bar-label"><span>Outros</span><span>60</span></div>
+                            <div class="progress-bar"><div class="progress-bar-fill" style="background-color: var(--mambo);" data-width="60"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="tab-reclamacoes" class="tab-content">
+            <div class="grid grid-cols-4">
+                <div class="metric-card card">
+                    <div class="label">Pão de Açúcar</div>
+                    <div class="value perf-bom">8.2</div>
+                    <div class="label">Nota Geral</div>
+                </div>
+                <div class="metric-card card">
+                    <div class="label">Carrefour</div>
+                    <div class="value perf-ruim">5.9</div>
+                    <div class="label">Nota Geral</div>
+                </div>
+                <div class="metric-card card">
+                    <div class="label">Super Muffato</div>
+                    <div class="value perf-bom">8.5</div>
+                    <div class="label">Nota Geral</div>
+                </div>
+                <div class="metric-card card">
+                    <div class="label">Sonda Delivery</div>
+                    <div class="value perf-medio">6.8</div>
+                    <div class="label">Nota Geral</div>
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <h4><i class="fas fa-exclamation-triangle"></i> Resumo de Fraquezas Cruzadas</h4>
+                <p><strong>Fraqueza Comum (Todos):</strong> A logística de entrega (atrasos, produtos trocados/faltantes) é o principal ponto de atrito para todos os players. Isso indica uma oportunidade de mercado para quem resolver essa dor de forma consistente.</p>
+                <p><strong>Fraqueza Pão de Açúcar:</strong> Reclamações focam em falha na entrega de produtos premium (ex: vinhos, itens importados) e problemas com o serviço de assinatura, o que afeta diretamente a percepção de valor da marca.</p>
+                <p><strong>Fraqueza Carrefour:</strong> Alto volume de reclamações sobre o marketplace (vendedores parceiros) e dificuldade no atendimento ao cliente, indicando problemas de escala e integração.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list-ul"></i> Top 10 Reclamações Recentes (Exemplos de Concorrentes)</h3>
+                </div>
+                <div class="responsive-table-container">
+                    <table class="responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Concorrente</th>
+                                <th>Tipo de Reclamação (Fraqueza)</th>
+                                <th>Exemplo Visual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong class="color-carrefour">Carrefour</strong></td><td>Atraso na entrega e pedido incompleto</td><td><img src="https://via.placeholder.com/150x50/e74c3c/ffffff?text=Pedido+atrasado+15+dias" alt="Reclamação"></td></tr>
+                            <tr><td><strong class="color-sonda">Sonda</strong></td><td>Produto entregue próximo do vencimento</td><td><img src="https://via.placeholder.com/150x50/9b59b6/ffffff?text=Iogurte+vencendo+amanhã" alt="Reclamação"></td></tr>
+                            <tr><td><strong class="color-mambo">Mambo</strong></td><td>Dificuldade de navegação no site</td><td><img src="https://via.placeholder.com/150x50/f1c40f/000000?text=Não+consigo+fechar+carrinho" alt="Reclamação"></td></tr>
+                            <tr><td><strong class="color-natural">Natural da Terra</strong></td><td>Qualidade dos produtos frescos (hortifruti)</td><td><img src="https://via.placeholder.com/150x50/e67e22/ffffff?text=Tomates+amassados" alt="Reclamação"></td></tr>
+                            <tr><td><strong class="color-carrefour">Carrefour</strong></td><td>Cobrança indevida no cartão de crédito</td><td><img src="https://via.placeholder.com/150x50/e74c3c/ffffff?text=Valor+cobrado+a+mais" alt="Reclamação"></td></tr>
+                             <tr><td><strong class="color-pao-de-acucar">Pão de Açúcar</strong></td><td>Item de adega indisponível após a compra</td><td><img src="https://via.placeholder.com/150x50/2ecc71/ffffff?text=Vinho+cancelado+do+pedido" alt="Reclamação"></td></tr>
+                             <tr><td><strong class="color-muffato">Super Muffato</strong></td><td>Problema com cupom de desconto não aplicado</td><td><img src="https://via.placeholder.com/150x50/3498db/ffffff?text=Cupom+inválido" alt="Reclamação"></td></tr>
+                             <tr><td><strong class="color-sonda">Sonda</strong></td><td>Atendimento via chat ineficiente</td><td><img src="https://via.placeholder.com/150x50/9b59b6/ffffff?text=40min+esperando+atendente" alt="Reclamação"></td></tr>
+                             <tr><td><strong class="color-oba">OBA</strong></td><td>Erro no agendamento da entrega</td><td><img src="https://via.placeholder.com/150x50/fd79a8/ffffff?text=Agendei+para+manhã,+veio+a+noite" alt="Reclamação"></td></tr>
+                             <tr><td><strong class="color-carrefour">Carrefour</strong></td><td>Produto do marketplace nunca entregue</td><td><img src="https://via.placeholder.com/150x50/e74c3c/ffffff?text=Loja+parceira+não+responde" alt="Reclamação"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-swot" class="tab-content">
+            <div class="swot-matrix">
+                <div class="matrix-quadrant swot-forcas">
+                    <h4><i class="fas fa-fist-raised"></i> Forças</h4>
+                    <ul>
+                        <li>Marca com forte percepção de qualidade e premium.</li>
+                        <li>Programa de fidelidade "Pão de Açúcar Mais" bem estabelecido.</li>
+                        <li>Curadoria de produtos e marcas exclusivas (Taeq, Qualitá, Casino).</li>
+                        <li>Boa localização de lojas físicas em áreas de alta renda.</li>
+                    </ul>
+                </div>
+                <div class="matrix-quadrant swot-fraquezas">
+                    <h4><i class="fas fa-thumbs-down"></i> Fraquezas</h4>
+                    <ul>
+                        <li>Percepção de preços mais altos que a concorrência.</li>
+                        <li>Inconsistências na operação de delivery (afeta a experiência premium).</li>
+                        <li>Vulnerabilidade em cenários econômicos de baixa.</li>
+                        <li>Comunicação pode ser vista como menos acessível.</li>
+                    </ul>
+                </div>
+                <div class="matrix-quadrant swot-oportunidades">
+                    <h4><i class="fas fa-lightbulb"></i> Oportunidades</h4>
+                    <ul>
+                        <li>Expandir o modelo de entregas ultra-rápidas (quick commerce).</li>
+                        <li>Aumentar a personalização de ofertas baseada em dados.</li>
+                        <li>Liderar a pauta de sustentabilidade no varejo alimentar.</li>
+                        <li>Criar conteúdo sobre gastronomia e harmonização para agregar valor.</li>
+                    </ul>
+                </div>
+                <div class="matrix-quadrant swot-ameacas">
+                    <h4><i class="fas fa-shield-alt"></i> Ameaças</h4>
+                    <ul>
+                        <li>Agressividade de preços de hipermercados (Carrefour).</li>
+                        <li>Crescimento de concorrentes de nicho (OBA, Natural da Terra).</li>
+                        <li>Novas startups de delivery com tecnologia superior.</li>
+                        <li>Flutuações cambiais que afetam produtos importados.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <h3><i class="fas fa-directions"></i> Estratégias Recomendadas e Roadmap 2025</h3>
+                </div>
+                 <div class="responsive-table-container">
+                    <table class="responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Estratégia</th>
+                                <th>Tipo</th>
+                                <th>Prioridade</th>
+                                <th>Roadmap 2025</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Melhorar a experiência de delivery com tracking em tempo real e SLA claro</td><td><strong>DO</strong> (Fraqueza + Oportunidade)</td><td><span class="badge badge-alta">Alta</span></td><td>Q1-Q2: Planejamento/Tecnologia; Q3-Q4: Rollout</td></tr>
+                            <tr><td>Lançar campanha de "Valor Premium" focada em curadoria e exclusividade, não preço</td><td><strong>FO</strong> (Força + Oportunidade)</td><td><span class="badge badge-alta">Alta</span></td><td>Início Imediato, contínuo</td></tr>
+                            <tr><td>Criar um "plano de combate" para ofertas agressivas do Carrefour em itens essenciais</td><td><strong>FA</strong> (Força + Ameaça)</td><td><span class="badge badge-media">Média</span></td><td>Análise Contínua, ações pontuais</td></tr>
+                             <tr><td>Expandir parcerias com chefs e influenciadores de gastronomia</td><td><strong>FO</strong> (Força + Oportunidade)</td><td><span class="badge badge-media">Média</span></td><td>Q2: Mapeamento; Q3: Contratação</td></tr>
+                            <tr><td>Otimizar precificação de itens sensíveis para reduzir percepção de "caro"</td><td><strong>DA</strong> (Fraqueza + Ameaça)</td><td><span class="badge badge-baixa">Baixa</span></td><td>Q4: Estudo de Elasticidade de Preço</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-5w2h" class="tab-content">
+             <div class="insight-box">
+                <h4><i class="fas fa-map-signs"></i> Plano de Ação Detalhado</h4>
+                <p>Com base nas estratégias da análise SWOT, o 5W2H detalha a execução das ações prioritárias para 2025, transformando estratégia em realidade.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                     <h3 class="color-pao-de-acucar">Ação Prioritária: Melhorar a Experiência de Delivery</h3>
+                </div>
+                <div class="w2h-matrix">
+                    <div class="matrix-quadrant" style="background-color: #eafaf1;"><h4><i class="fas fa-question-circle"></i> What (O quê?)</h4><p>Implementar um sistema de tracking de entregas em tempo real no app e site, com comunicação proativa sobre o status do pedido.</p></div>
+                    <div class="matrix-quadrant" style="background-color: #fdecea;"><h4><i class="fas fa-question-circle"></i> Why (Por quê?)</h4><p>Para reduzir a ansiedade do cliente, diminuir o número de reclamações no ReclameAQUI e reforçar a promessa de uma experiência premium e confiável.</p></div>
+                    <div class="matrix-quadrant" style="background-color: #ebf5fb;"><h4><i class="fas fa-question-circle"></i> Who (Quem?)</h4><p>Equipes de Tecnologia (desenvolvimento), Operações/Logística (implementação) e Customer Service (treinamento).</p></div>
+                    <div class="matrix-quadrant" style="background-color: #fef5eb;"><h4><i class="fas fa-question-circle"></i> Where (Onde?)</h4><p>Inicialmente como piloto nas capitais (SP, RJ) e depois expandindo para todas as áreas com cobertura de delivery online.</p></div>
+                    <div class="matrix-quadrant" style="background-color: #fff9e6;"><h4><i class="fas fa-question-circle"></i> How (Como?)</h4><p>Contratando uma solução de mercado (SaaS de logística) e integrando via API ao sistema do Pão de Açúcar, ou desenvolvendo uma solução interna se viável.</p></div>
+                    <div class="matrix-quadrant" style="background-color: #f3e5f5;"><h4><i class="fas fa-question-circle"></i> How Much (Quanto?)</h4><p>Estimativa de investimento de R$ 1.5M - R$ 2.5M para o primeiro ano (licenciamento/desenvolvimento + integração).</p></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <div class="card-header">
+                    <h3 class="color-carrefour">Ação Prioritária: Campanha "Valor Premium"</h3>
+                </div>
+                 <div class="w2h-matrix">
+                     <div class="matrix-quadrant" style="background-color: #eafaf1;"><h4><i class="fas fa-question-circle"></i> What (O quê?)</h4><p>Criar uma campanha de marketing multicanal (digital, social, CRM) que destaque a qualidade, a origem dos produtos e a curadoria da marca.</p></div>
+                    <div class="matrix-quadrant" style="background-color: #fdecea;"><h4><i class="fas fa-question-circle"></i> Why (Por quê?)</h4><p>Para justificar o posicionamento de preço, educar o consumidor sobre os diferenciais da marca e fortalecer a lealdade para além das promoções.</p></div>
+                    <div class="matrix-quadrant" style="background-color: #ebf5fb;"><h4><i class="fas fa-question-circle"></i> Who (Quem?)</h4><p>Equipes de Marketing, Branding e Comercial (para seleção de produtos).</p></div>
+                    <div class="matrix-quadrant" style="background-color: #fef5eb;"><h4><i class="fas fa-question-circle"></i> Where (Onde?)</h4><p>Instagram, YouTube (com conteúdo de receitas), E-mail Marketing para base de clientes "Mais" e anúncios em portais de gastronomia.</p></div>
+                    <div class="matrix-quadrant" style="background-color: #fff9e6;"><h4><i class="fas fa-question-circle"></i> How (Como?)</h4><p>Produzindo vídeos de alta qualidade, artigos de blog, parcerias com influenciadores e criando "selos de curadoria" para os produtos.</p></div>
+                    <div class="matrix-quadrant" style="background-color: #f3e5f5;"><h4><i class="fas fa-question-circle"></i> How Much (Quanto?)</h4><p>Estimativa de R$ 3M em produção de conteúdo e mídia para a campanha de lançamento (6 meses).</p></div>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lógica de navegação por abas
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove a classe 'active' de todos
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Adiciona 'active' ao botão clicado e ao conteúdo correspondente
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+                
+                // Dispara a animação das barras de progresso na aba ativa
+                if (button.dataset.tab === 'tab-ads' || button.dataset.tab === 'tab-reclamacoes') {
+                    animateProgressBars();
+                }
+            });
+        });
+
+        // Lógica para animar as barras de progresso quando ficam visíveis
+        const animateProgressBars = () => {
+            const progressBars = document.querySelectorAll('.progress-bar-fill');
+            progressBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                // Adiciona um pequeno delay para a transição ser mais visível
+                setTimeout(() => {
+                    bar.style.width = width + '%';
+                }, 200);
+            });
+        };
+
+        // Animação de elementos ao rolar (efeito "fade in")
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    if (entry.target.querySelector('.progress-bar-fill')) {
+                       animateProgressBars();
+                    }
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const elementsToAnimate = document.querySelectorAll('.card, .insight-box');
+        elementsToAnimate.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Ativa a animação da primeira aba por padrão
+        animateProgressBars();
+    });
+    </script>
+
+</body>
+</html>
